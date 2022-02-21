@@ -38,6 +38,13 @@ public class BaseSpringBootReactorApplication implements CommandLineRunner{
 			
 			.filter(usuario -> usuario.getNombre().equalsIgnoreCase("Juan"))
 			
+			.doOnNext(usuario -> {
+				if(usuario == null) {
+					throw new RuntimeException("Usuario nulo");
+				}
+				System.out.println(usuario);
+			})
+			
 			.subscribe(
 					usuario -> log.info(usuario.toString())
 			);
