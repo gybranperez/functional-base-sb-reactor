@@ -1,5 +1,9 @@
 package mx.com.ciecas.app;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -8,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import mx.com.ciecas.app.models.User;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @SpringBootApplication
 public class BaseSpringBootReactorApplication implements CommandLineRunner{
@@ -19,12 +24,58 @@ public class BaseSpringBootReactorApplication implements CommandLineRunner{
 	}
 
 	@Override
-	public void run(String... args) throws Exception {
-		ejemploIterable();
+	public void run(String... args) throws Exception { 
+		
+		ejemploCollectList();
 		
 	}
 	
+	public void ejemploCollectList() throws Exception{
+		List<User> list = Stream
+				.of(
+					new User("Juan", "Perez"),
+					new User("Carlos", "Hernandez"),
+					new User("Juan", "Paramo"),
+					new User("Rodrigo", "Rosales"),
+					new User("Carlos", "Juarez")
+				)
+				.collect(Collectors.toList());
+		
+		Flux.fromIterable(list)
+			.collectList()
+			.subscribe(
+					lista -> lista
+					.forEach(
+						item -> log.info(item.toString())
+					)
+			);
+	}
+	
 	public void ejemploFlatMap() throws Exception{
+		
+		List<User> list = Stream
+				.of(
+					new User("Juan", "Perez"),
+					new User("Carlos", "Hernandez"),
+					new User("Juan", "Paramo"),
+					new User("Rodrigo", "Rosales"),
+					new User("Carlos", "Juarez")
+				)
+				.collect(Collectors.toList());
+		
+		Flux.fromIterable(list)
+				
+				.map(u -> u.getNombre().concat(" ").concat(u.getApellido()))
+				
+				.flatMap(nombre -> {
+					return (nombre.toLowerCase().contains("carlos")) ? Mono.just(nombre) : Mono.empty() ;
+				})
+				
+				.map(nombre -> nombre.toUpperCase())
+				
+				.subscribe(
+						nombre -> log.info(nombre.toString())
+				);
 		
 	}
 	
